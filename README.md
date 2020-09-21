@@ -1,2 +1,2 @@
 # UWSC-libs
-UWSC Libraries
+UWSCで使う機能の寄せ集め

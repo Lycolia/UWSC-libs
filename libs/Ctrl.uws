@@ -1,0 +1,31 @@
+// Ctrl
+MODULE Ctrl
+
+    // Ctrl + C
+    PROCEDURE c()
+        this.click(VK_C)
+    FEND
+
+    // Ctrl + V
+    PROCEDURE v()
+        this.click(VK_V)
+    FEND
+
+    // Ctrl + S
+    PROCEDURE s()
+        this.click(VK_S)
+    FEND
+    
+    // Ctrl + G
+    PROCEDURE g()
+        this.click(VK_G)
+    FEND
+    
+    // ctrl + any key
+    PROCEDURE click(key)
+        KBD(VK_CTRL, DOWN, 100)
+        KBD(key, CLICK, 100)
+        KBD(VK_CTRL, UP, 100)
+    FEND
+
+ENDMODULE

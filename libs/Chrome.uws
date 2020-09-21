@@ -1,0 +1,36 @@
+Call Common.uws
+
+// Chrome
+MODULE Chrome
+
+    // ページが読み込み完了するまで待つ
+    PROCEDURE waitPageLoaded()
+        DIM isLoading = True
+        DIM loaded = False
+        DIM visibleReload = False
+        SLEEP(0.3)
+        WHILE isLoading
+            // ロードアイコンが消えているか
+            loaded = !CHKIMG("libs/resources/loadingIcon.bmp", 0, 0, 0, 50, 50)
+            // 更新マークが出ているか
+            visibleReload = CHKIMG("libs/resources/reloadIcon.bmp", 0, 70, 40, 110, 70)
+            IF loaded AND visibleReload THEN
+                isLoading = False
+            ENDIF
+        WEND
+    FEND
+
+    // ChromeがCrushしているか
+    FUNCTION isCrush()
+        DIM crush1 = CHKIMG("libs/resources/crush1.bmp", 0, 650, 350, 710, 410)
+        DIM crush2 = CHKIMG("libs/resources/crush2.bmp", 0, 660, 260, 700, 320)
+
+        IF crush1 OR crush2 THEN
+            RESULT = True
+        ELSE
+            RESULT = False
+        ENDIF
+    FEND
+
+
+ENDMODULE

@@ -1,0 +1,37 @@
+// 正規表現処理
+MODULE RegEx
+
+    // 検査
+    FUNCTION test(pattern, subject, gSwitch = True, iSwitch = False)
+        re = this.createRegExpObj(pattern, gSwitch, iSwitch)
+        RESULT = re.Test(subject)
+    FEND
+
+    // 置換
+    FUNCTION replace(pattern, subject, replacement, gSwitch = True, iSwitch = False)
+        re = this.createRegExpObj(pattern, gSwitch, iSwitch)
+        RESULT = re.Replace(subject, replacement)
+    FEND
+
+    // 検査, resArrに結果が入る
+    // UWSCは配列を戻り地にできないため苦肉の策（SLICEで返してもForすると型エラーで使えない）
+    PROCEDURE match(pattern, subject, Var resArr[], gSwitch = True, iSwitch = False)
+        re = this.createRegExpObj(pattern, gSwitch, iSwitch)
+        Dim mats = re.Execute(subject)
+        PRINT mats.Count
+        For idx = 0 To mats.Count - 1
+            resArr[idx] = mats.item(idx).Value
+            RESIZE(resArr, idx + 1)
+        Next
+    FEND
+
+    // RegExpオブジェクトを生成
+    FUNCTION createRegExpObj(pattern, gSwitch = True, iSwitch = False)
+        re = CreateOleObj("VBScript.RegExp")
+        re.pattern = pattern
+        re.Global = gSwitch
+        re.IgnoreCase = iSwitch
+        RESULT = re
+    FEND
+
+ENDMODULE

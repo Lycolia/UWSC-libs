@@ -1,0 +1,46 @@
+// 汎用関数
+MODULE Common
+
+    // ウィンドウのアクティブ化
+    PROCEDURE activateWindow(win_title, win_cls)
+        DIM wid = GETID(win_title, win_cls)
+        IFB STATUS(wid, ST_ICON)
+            CTRLWIN(wid, NORMAL)
+        ENDIF
+        IFB !STATUS(wid, ST_ACTIVE)
+            CTRLWIN(wid, ACTIVATE)
+        ENDIF
+    FEND
+
+    // ウィンドウキャプチャの取得
+    PROCEDURE captureWindow()
+        DIM cbText = "####"
+        WHILE cbText <> ""
+            // 成功するまでリトライ
+            KBD(VK_ALT, DOWN, 100)
+            KBD(VK_SNAPSHOT, CLICK, 100)
+            KBD(VK_ALT, UP, 100)
+            // 成功したら空文字が取れる
+            cbText = GETSTR(0)
+        WEND
+        SLEEP(0.2)
+    FEND
+
+    // 現在のyyyy-MM-dd, 引数はDateのデリミタ
+    FUNCTION nowDate(delimiter = "-")
+        GETTIME()
+        RESULT = G_TIME_YY4 + delimiter + G_TIME_MM2 + delimiter + G_TIME_DD2
+    FEND
+
+    // 現在のHH:mm
+    FUNCTION nowTime()
+        GETTIME()
+        RESULT = G_TIME_HH2 + ":" + G_TIME_NN2
+    FEND
+
+    // 現在のyyyy-MM-dd HH:mm, 引数はDateのデリミタ
+    FUNCTION nowDateTime(delimiter = "-")
+        GETTIME()
+        RESULT = G_TIME_YY4 + delimiter + G_TIME_MM2 + delimiter + G_TIME_DD2 + " " + G_TIME_HH2 + ":" + G_TIME_NN2
+    FEND
+ENDMODULE
