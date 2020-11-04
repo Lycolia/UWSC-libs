@@ -8,7 +8,7 @@ MODULE RegEx
     FEND
 
     // 置換
-    FUNCTION replace(pattern, subject, replacement, gSwitch = True, iSwitch = False)
+    FUNCTION replace(pattern, replacement, subject, gSwitch = True, iSwitch = False)
         re = this.createRegExpObj(pattern, gSwitch, iSwitch)
         RESULT = re.Replace(subject, replacement)
     FEND
