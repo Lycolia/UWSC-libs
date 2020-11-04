@@ -1,6 +1,8 @@
 // 汎用関数
 MODULE Common
 
+    CONST KBD_WAIT = 100
+
     // ウィンドウのアクティブ化
     PROCEDURE activateWindow(win_title, win_cls)
         DIM wid = GETID(win_title, win_cls)
@@ -17,9 +19,9 @@ MODULE Common
         DIM cbText = "####"
         WHILE cbText <> ""
             // 成功するまでリトライ
-            KBD(VK_ALT, DOWN, 100)
-            KBD(VK_SNAPSHOT, CLICK, 100)
-            KBD(VK_ALT, UP, 100)
+            KBD(VK_ALT, DOWN, this.KBD_WAIT)
+            KBD(VK_SNAPSHOT, CLICK, this.KBD_WAIT)
+            KBD(VK_ALT, UP, this.KBD_WAIT)
             // 成功したら空文字が取れる
             cbText = GETSTR(0)
         WEND
