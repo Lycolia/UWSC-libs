@@ -32,5 +32,17 @@ MODULE Chrome
         ENDIF
     FEND
 
+    // Fireshotでページのフルキャプチャを取得しクリップボードに転送
+    PROCEDURE captureFireshot()
+        Dim captured = False
+        SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_SHIFT, VK_Y)
+        SLEEP(0.3)
+        WHILE !captured
+            captured = CHKIMG("libs/resources/sss_48.bmp", 0, 300, 100, 500, 300)
+        WEND
+        SLEEP(0.3)
+        BTN(LEFT, CLICK, 1420, 477, 100)
+        SLEEP(0.3)
+    FEND
 
 ENDMODULE
