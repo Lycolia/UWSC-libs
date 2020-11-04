@@ -1,6 +1,5 @@
 Call Common.uws
 Call RegEx.uws
-Call Ctrl.uws
 
 // エクセル操作
 MODULE Excel
@@ -9,19 +8,18 @@ MODULE Excel
 
     // シートの挿入
     PROCEDURE insertSheet(name = "")
-        KBD(VK_ESC, DOWN, 0)
-        // add sheet
-        KBD(VK_ALT, DOWN, 0)
-        KBD(VK_SHIFT, DOWN, 0)
-        KBD(VK_F1, CLICK, 100)
-        KBD(VK_SHIFT, UP, 0)
-        // move end
-        KBD(VK_E, CLICK, 100)
-        KBD(VK_M, CLICK, 100)
-        KBD(VK_END, CLICK, 100)
-        KBD(VK_ALT, UP, 100)
-        KBD(VK_RETURN, CLICK, 100)
+        KBD(VK_ESC, CLICK, 0)
+        SLEEP(0.2)
+        // シート追加
+        SCKEY(GETID(GET_ACTIVE_WIN), VK_ALT, VK_SHIFT, VK_F1)
+        SLEEP(0.5)
+        // シート移動
+        SCKEY(GETID(GET_ACTIVE_WIN), VK_ALT, VK_E, VK_M)
+        SLEEP(0.5)
+        KBD(VK_END, CLICK, Common.KBD_WAIT)
+        KBD(VK_RETURN, CLICK, Common.KBD_WAIT)
         IF name <> "" THEN
+            SLEEP(0.2)
             this.renameSheet(name)
         ENDIF
     FEND
@@ -29,19 +27,16 @@ MODULE Excel
     // アクティブシートのリネーム
     PROCEDURE renameSheet(name)
         KBD(VK_ESC, DOWN, 0)
-        // change input
-        KBD(VK_ALT, DOWN, 100)
-        KBD(VK_H, CLICK, 100)
-        KBD(VK_O, CLICK, 100)
-        KBD(VK_R, CLICK, 100)
-        KBD(VK_ALT, UP, 100)
-        // clear input
-        KBD(VK_DELETE, CLICK, 100)
-        // send input
+        // シート名編集状態に変更
+        SCKEY(GETID(GET_ACTIVE_WIN), VK_ALT, VK_H, VK_O, VK_R)
         SLEEP(0.2)
+        // 全削除
+        KBD(VK_DELETE, CLICK, Common.KBD_WAIT)
+        SLEEP(0.2)
+        // テキスト入力
         SENDSTR(GETID(GET_ACTIVE_WIN), name)
-        // fix
-        KBD(VK_RETURN, CLICK, 100)
+        KBD(VK_RETURN, CLICK, Common.KBD_WAIT)
+        SLEEP(0.2)
     FEND
 
 //#endregion
@@ -50,31 +45,32 @@ MODULE Excel
 
     // セルジャンプ
     PROCEDURE jump(position)
-        KBD(VK_ESC, DOWN, 0)
-        Ctrl.g()
+        KBD(VK_ESC, CLICK, 0)
+        SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_G)
+        SLEEP(0.2)
         SENDSTR(GETID(GET_ACTIVE_WIN), position)
         SLEEP(0.2)
-        KBD(VK_RETURN, CLICK, 100)
+        KBD(VK_RETURN, CLICK, Common.KBD_WAIT)
     FEND
 
     // 1セル上に
     PROCEDURE selectUp()
-        KBD(VK_UP, CLICK, 100)
+        KBD(VK_UP, CLICK, Common.KBD_WAIT)
     FEND
 
     // 1セル下に
     PROCEDURE selectDown()
-        KBD(VK_DOWN, CLICK, 100)
+        KBD(VK_DOWN, CLICK, Common.KBD_WAIT)
     FEND
     
     // 1セル左に
     PROCEDURE selectLeft()
-        KBD(VK_LEFT, CLICK, 100)
+        KBD(VK_LEFT, CLICK, Common.KBD_WAIT)
     FEND
     
     // 1セル右に
     PROCEDURE selectRight()
-        KBD(VK_RIGHT, CLICK, 100)
+        KBD(VK_RIGHT, CLICK, Common.KBD_WAIT)
     FEND
 
 //#endregion
@@ -84,20 +80,20 @@ MODULE Excel
     // 現在選択されているセルの座標情報を取得、エクセルがフルウィンドウでリボン出てる必要あり
     FUNCTION getSelectedCellPosition()
         BTN(LEFT, CLICK, 45, 170, 100)
-        Ctrl.c()
+        SLEEP(0.1)
+        SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_C)
+        SLEEP(0.2)
         RESULT = GETSTR(0)
     FEND
 
     // 現在選択されているセルの行番号を取得、エクセルがフルウィンドウでリボン出てる必要あり、A1形式のみ対応
     FUNCTION getSelectedRow()
-        this.getSelectedCellPosition()
-        RESULT = RegEx.replace("^[A-Z]+?([0-9]+)$", GETSTR(0), "$1")
+        RESULT = RegEx.replace("^[A-Z]+?([0-9]+)$", "$1", this.getSelectedCellPosition())
     FEND
 
     // 現在選択されているセルの列号を取得、エクセルがフルウィンドウでリボン出てる必要あり、A1形式のみ対応
     FUNCTION getSelectedColumn()
-        this.getSelectedCellPosition()
-        RESULT = RegEx.replace("^([A-Z]+?)[0-9]+$", GETSTR(0), "$1")
+        RESULT = RegEx.replace("^([A-Z]+?)[0-9]+$", "$1", this.getSelectedCellPosition())
     FEND
 
 //#endregion
@@ -111,9 +107,9 @@ MODULE Excel
             buf = buf + item + "<#TAB>"
         NEXT
         
-        buf = RegEx.replace("\t*$", buf, "")
+        buf = RegEx.replace("\t*$", "", buf)
         SENDSTR(0, buf)
-        Ctrl.v()
+        SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_V)
     FEND
 
 //#endregion
