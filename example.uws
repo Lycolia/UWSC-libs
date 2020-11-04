@@ -1,15 +1,108 @@
 Call libs/Common.uws
-Call libs/Ctrl.uws
 Call libs/Excel.uws
 Call libs/Chrome.uws
+Call libs/RegEx.uws
 
-Common.activateWindow("Book2", "XLMAIN")
-Dim currRow = Excel.getSelectedRow()
-Excel.jump("A" + currRow)
-Ctrl.c
-Dim testNo = GETSTR(0)
-Common.activateWindow("Google Chrome", "Chrome_WidgetWin_1")
-Common.captureWindow()
-Common.activateWindow("Book3", "XLMAIN")
-Excel.insertSheet(testNo)
-Ctrl.v()
+// デザインの新旧のスクショを貼るサンプル
+// ===== 前提条件 =====
+// 事前にChromeの1タブに旧レイアウト、2タブに新レイアウトを出しておく
+// シナリオブックとエビデンスブックは開いておく
+// スクショにはFireShotを利用する
+// 安定性を重視しているのでパフォーマンスは良くない
+// ===== 実行手順 =====
+// sinario.xlsxを選択
+// 選択行から試験番号を取得し(2セルに分かれているので、それぞれを取得して結合)
+// Chromeの1タブを選択、スクショを取り
+// ebi.xlsxを選択
+// 試験番号でシートを追加し、スクショ貼り付け
+// Chromeの2タブを選択、スクショを取り
+// ebi.xlsxを選択
+// 旧スクショの下までスクロール
+// スクショ貼り付け
+
+createFirstEvidence(getTestNo())
+createSecondEvidence()
+
+// Excelに貼り付けた旧キャプチャ画像の直下のセルにカーソルを移動する
+// 貼り付けたスクショが巨大すぎると機能しない場合がある
+PROCEDURE moveToBreak()
+    // 空白が出るまで下方向にスクロール
+    WHILE !CHKIMG("libs/resources/excel-line-break.bmp", 2000, 210, 0, 2150, 320)
+        KBD(VK_NEXT, CLICK, 0)
+    WEND
+
+    // スクロールしすぎるので上の空白を詰める
+    WHILE CHKIMG("libs/resources/excel-line-break.bmp", 2000, 210, 0, 2150, 320)
+        KBD(VK_UP, CLICK, 0)
+    WEND
+    
+    // カーソル位置調整
+    // 上移動が上まで行きすぎるため
+    FOR index = 0 To 10
+        KBD(VK_DOWN, CLICK, 0)
+    NEXT
+
+    SLEEP(0.3)
+FEND
+
+// @param name キャプチャの名前
+// クリップボードのキャプチャをペーストする
+PROCEDURE pasteCapture(name)
+    // ラベル入力
+    SENDSTR(GETID(GET_ACTIVE_WIN), name)
+    SLEEP(0.1)
+    // カーソル移動
+    KBD(VK_DOWN, CLICK, Common.KBD_WAIT)
+    KBD(VK_RIGHT, CLICK, Common.KBD_WAIT)
+    SLEEP(0.1)
+    // キャプチャペースト
+    SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_V)
+    SLEEP(0.1)
+    // 選択解除
+    KBD(VK_ESC, CLICK, Common.KBD_WAIT)
+FEND
+
+// シナリオから試験番号を取得
+FUNCTION getTestNo()
+    Common.activateWindow("scenario", "XLMAIN")
+    Dim currRow = Excel.getSelectedRow()
+    Excel.jump("B" + currRow)
+    SLEEP(0.3)
+    SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_C)
+    Dim parentNo = RegEx.replace("\r*\n*", "", GETSTR(0))
+    KBD(VK_RIGHT, CLICK, Common.KBD_WAIT)
+    SLEEP(0.1)
+    SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_C)
+    SLEEP(0.1)
+    Dim childNo = RegEx.replace("\r*\n*", "", GETSTR(0))
+    RESULT = parentNo + "-" + childNo
+FEND
+
+// 一枚目のエビデンスを作成する
+PROCEDURE createFirstEvidence(testNo)
+    Common.activateWindow("Google Chrome", "Chrome_WidgetWin_1")
+    SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_1)
+    Chrome.captureFireshot()
+    Common.activateWindow("ebi", "XLMAIN")
+    Excel.insertSheet(testNo)
+    SLEEP(0.2)
+    pasteCapture("旧")
+FEND
+
+// 二枚目のエビデンスを作成する
+PROCEDURE createSecondEvidence()
+    Common.activateWindow("Google Chrome", "Chrome_WidgetWin_1")
+    SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_2)
+    Chrome.captureFireshot()
+    SLEEP(1)
+    Common.activateWindow("ebi", "XLMAIN")
+    // カーソルの列位置を左へ戻す
+    KBD(VK_LEFT, CLICK, Common.KBD_WAIT)
+    moveToBreak()
+    pasteCapture("新")
+    // 左上に飛ぶ
+    SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_HOME)
+    SLEEP(0.1)
+    // 保存
+    SCKEY(GETID(GET_ACTIVE_WIN), VK_CTRL, VK_S)
+FEND
